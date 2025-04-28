@@ -3,7 +3,7 @@ vim.g.mapleader = " "
 local map = vim.keymap.set
 
 local function resize_vertical_splits()
-		vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-w>=", false, true, true), "n", false)
+    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-w>=", false, true, true), "n", false)
 end
 
 if vim.g.vscode then
@@ -30,6 +30,7 @@ else
     vim.opt.clipboard = "unnamedplus"
     vim.opt.signcolumn = "number"
     vim.opt.hidden = true
+    vim.opt.fillchars = { eob = ' ', }
 
     -- General settings
     vim.opt.backup = false
@@ -60,6 +61,13 @@ else
     vim.opt.autoindent = true
     vim.opt.cindent = true
     vim.opt.smartindent = true
+
+    -- Go
+    vim.g.go_metalinter = "golangci-lint"
+    vim.g.go_metalinter_command = 'golangci-lint'
+    vim.g.go_metalinter_enabled = {}
+    vim.g.go_metalinter_autosave = 1
+    vim.g.go_metalinter_autosave_enabled = {'govet', 'errcheck', 'staticcheck', 'unused'}
 
     -- Disable netrw
     vim.g.loaded_netrw = 1
@@ -149,7 +157,7 @@ else
         },
 
         --csv
-        { "chrisbra/csv.vim",                ft = "csv" },
+        { "chrisbra/csv.vim",        ft = "csv" },
 
         -- Sudo write/read
         { "lambdalisue/vim-suda" },
@@ -157,20 +165,17 @@ else
         -- Focus
         { "folke/zen-mode.nvim" },
 
-        { "echasnovski/mini.jump2d",         config = function() require("mini.jump2d").setup() end },
+        { "echasnovski/mini.jump2d", config = function() require("mini.jump2d").setup() end },
 
         -- Colorscheme
-        {"vague2k/vague.nvim"},
-{
-  "candle-grey",
-  dir = "~/Projects/candle-grey", -- Path to your Lua theme
-},
- --       {"aditya-azad/candle-grey"},
-        { "nyoom-engineering/oxocarbon.nvim" },
-        { "Verf/deepwhite.nvim" },
+        -- {"iruzo/matrix-nvim"},
+        { "savq/melange-nvim" },
+
+        -- { "Verf/deepwhite.nvim" },
+        { "Verf/deepwhite.nvim", dev=true, dir="~/Projects/deepwhite.nvim/"},
 
         -- Debugger
-        { "leoluz/nvim-dap-go",              ft = "go" },
+        { "leoluz/nvim-dap-go",      ft = "go" },
         {
             "mfussenegger/nvim-dap",
             dependencies = { "nvim-neotest/nvim-nio", "theHamsta/nvim-dap-virtual-text", "rcarriga/nvim-dap-ui" },
@@ -346,9 +351,7 @@ else
         command = 'set filetype=jq',
     })
 
-    -- local cmp_autopairs = require 'nvim-autopairs.completion.cmp'
     local cmp = require 'cmp'
-    --    cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
     local luasnip = require 'luasnip'
     local SymbolKind = vim.lsp.protocol.SymbolKind
     cmp.setup({
@@ -387,10 +390,10 @@ else
             end, { "i", "s" }),
         }),
         sources = {
-            { name = "nvim_lsp", max_item_count = 5 },
-            { name = "buffer",   max_item_count = 5 },
-            { name = "path",     max_item_count = 5 },
-            { name = "luasnip",  max_item_count = 3 },
+            { name = "nvim_lsp", max_item_count = 10 },
+            { name = "buffer",   max_item_count = 10 },
+            { name = "path",     max_item_count = 10 },
+            { name = "luasnip",  max_item_count = 10 },
         },
         formatting = {
             format = function(_, vim_item)
@@ -399,6 +402,7 @@ else
             end,
         },
     })
+
     vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
         border = "rounded", -- Options: 'none', 'single', 'double', 'rounded', 'solid', 'shadow'
     })
@@ -407,6 +411,7 @@ else
     vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
         border = "rounded", -- Same border options
     })
+
     require 'lsp-lens'.setup({
         enable = true,
         include_declaration = false, -- Reference include declaration
@@ -422,6 +427,7 @@ else
         -- Symbol Kinds that may have target symbol kinds as children
         wrapper_symbol_kinds = { SymbolKind.Class, SymbolKind.Struct },
     })
+
     require 'nvim-treesitter.configs'.setup {
         ensure_installed = "all",
         incremental_selection = {
@@ -437,251 +443,139 @@ else
         indent = {
             enable = true,
         },
-        textobjects = {
-            select = {
-                enable = true,
-                lookahead = true,
-                keymaps = {
-                    ["af"] = "@function.outer",
-                    ["if"] = "@function.inner",
-                    ["ac"] = "@class.outer",
-                    ["ic"] = "@class.inner",
-                    ["aa"] = "@parameter.outer",
-                    ["ia"] = "@parameter.inner",
-                },
-            },
-            move = {
-                enable = true,
-                set_jumps = true,
-                goto_next_start = {
-                    ["]a"] = "@parameter.inner",
-                    ["]m"] = "@function.outer",
-                    ["]]"] = "@class.outer",
-                },
-                goto_next_end = {
-                    ["]A"] = "@parameter.inner",
-                    ["]M"] = "@function.outer",
-                    ["]["] = "@class.outer",
-                },
-                goto_previous_start = {
-                    ["[a"] = "@parameter.inner",
-                    ["[m"] = "@function.outer",
-                    ["[["] = "@class.outer",
-                },
-                goto_previous_end = {
-                    ["[A"] = "@parameter.inner",
-                    ["[M"] = "@function.outer",
-                    ["[]"] = "@class.outer",
-                },
-            },
-            swap = {
-                enable = true,
-                swap_next = {
-                    ["<leader>a"] = "@parameter.inner",
-                },
-                swap_previous = {
-                    ["<leader>A"] = "@parameter.inner",
-                },
-            },
-            lsp_interop = {
-                enable = true,
-                border = 'none',
-                peek_definition_code = {
-                    ["<leader>df"] = "@function.outer",
-                    ["<leader>dF"] = "@class.outer",
-                },
-            },
+    }
+
+    local mason = require("mason")
+    local mason_dap = require("mason-nvim-dap")
+    local dap = require("dap")
+    local ui = require("dapui")
+
+    dap.set_log_level("TRACE")
+
+    mason.setup()
+    mason_dap.setup({})
+
+    dap.configurations.go = {
+        {
+            type = "go",
+            name = "Attach",
+            request = "attach",
+            mode = "remote",
+            host = "127.0.0.1",
+            port = 8498,
+            showLog = true,
+            apiVersion = 2,
+            trace = "verbose",
+            dlvToolPath = vim.fn.exepath("dlv"),
+        },
+        {
+            type = "go",
+            name = "Run (and debug)",
+            request = "launch",
+            showLog = false,
+            program = "${file}",
+            dlvToolPath = vim.fn.exepath("dlv"),
         },
     }
 
+    dap.adapters.go = {
+        type = "executable",
+        command = "node",
+        args = { os.getenv("HOME") .. "/Projects/vscode-go/extension/dist/debugAdapter.js" },
+        dlvToolPath = vim.fn.exepath('dlv') or "/usr/bin/dlv",
+        enrich_config = function(conf, on_config)
+            conf.args = { os.getenv("HOME") .. "/Projects/vscode-go/extension/dist/debugAdapter.js" }
+            conf.dlvToolPath = vim.fn.exepath('dlv') or "/usr/bin/dlv"
+            on_config(conf)
+        end,
+    }
 
-   -- {
-   -- "rcarriga/nvim-dap-ui",
-   -- dependencies = {
-   -- 	"jay-babu/mason-nvim-dap.nvim",
-   -- 	"mfussenegger/nvim-dap",
-   -- 	"nvim-neotest/nvim-nio",
-   -- 	"williamboman/mason.nvim",
-   -- },
-   -- },
-		local mason = require("mason")
-		local mason_dap = require("mason-nvim-dap")
-		local dap = require("dap")
-		local ui = require("dapui")
+    vim.fn.sign_define("DapBreakpoint", { text = "🔴", texthl = "", linehl = "", numhl = "" })
+    vim.fn.sign_define("DapBreakpointCondition", { text = "🟠", texthl = "", linehl = "", numhl = "" })
+    vim.fn.sign_define("DapStopped", { text = "🟢", texthl = "", linehl = "", numhl = "" })
+    vim.fn.sign_define("DapBreakpointRejected", { text = "🚫", texthl = "", linehl = "", numhl = "" })
 
-		dap.set_log_level("TRACE")
+    dap.listeners.after.event_initialized["dapui_config"] = function()
+        local has_dap_repl = false
+        for _, buf in ipairs(vim.fn.tabpagebuflist()) do
+            if vim.bo[buf].filetype == "dap-repl" then
+                vim.opt_local.wrap = true
+                has_dap_repl = true
+                break
+            end
+        end
 
-		-- ╭──────────────────────────────────────────────────────────╮
-		-- │ Debuggers                                                │
-		-- ╰──────────────────────────────────────────────────────────╯
-		-- We need the actual programs to connect to running instances of our code.
-		-- Debuggers are installed via https://github.com/jayp0521/mason-nvim-dap.nvim
-		mason.setup()
-		mason_dap.setup({
-			ensure_installed = {
-				--"delve@v1.20.2",
-				-- "js@v1.77.0",
-				-- "node2@v1.43.0", TODO: Not working
-			},
-			automatic_installation = true,
-		})
+        if not has_dap_repl then
+            -- vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-o>", false, true, true), "n", false)
+            ui.toggle({})
+        end
+    end
 
-		dap.configurations.go = {
-			{
-				type = "go",
-				name = "Attach",
-				request = "attach",
-				mode = "remote",
-				host = "127.0.0.1",
-				port = 8498,
-				showLog = true,
-				apiVersion = 2,
-				trace = "verbose",
-				dlvToolPath = vim.fn.exepath("dlv"), -- Adjust to where delve is installed
-			},
-			{
-				type = "go",
-				name = "Run (and debug)",
-				request = "launch",
-				showLog = false,
-				program = "${file}",
-				dlvToolPath = vim.fn.exepath("dlv"), -- Adjust to where delve is installed
-			},
-		}
+    -- Kills the debug process
+    local function dap_kill_debug_process()
+        dap.clear_breakpoints()
+        dap.terminate({}, { terminateDebuggee = true }, function()
+            ui.close({})
+            -- resize_vertical_splits()
+            vim.notify("Debug process killed", vim.log.levels.WARN)
+        end)
+    end
 
-		dap.adapters.go = {
-			type = "executable",
-			command = "node",
-			args = { "/home/me/Projects/vscode-go/extension/dist/debugAdapter.js" },
-		}
+    -- Other keybindings
+    map("n", "<leader>td", require "dap-go".debug_test, { noremap = true, silent = true })
+    map("n", "<leader>tD", require "dap-go".debug_last_test, { noremap = true, silent = true })
 
-		-- ╭──────────────────────────────────────────────────────────╮
-		-- │ Keybindings + UI                                         │
-		-- ╰──────────────────────────────────────────────────────────╯
-		vim.fn.sign_define("DapBreakpoint", { text = "🔴", texthl = "", linehl = "", numhl = "" })
-		vim.fn.sign_define("DapBreakpointCondition", { text = "🟠", texthl = "", linehl = "", numhl = "" })
-		vim.fn.sign_define("DapStopped", { text = "🟢", texthl = "", linehl = "", numhl = "" })
-		vim.fn.sign_define("DapBreakpointRejected", { text = "🚫", texthl = "", linehl = "", numhl = "" })
+    map("n", "<leader>dc", dap_kill_debug_process)
+    map("n", "<f3>", require "dap".toggle_breakpoint, { noremap = true, silent = true })
+    map("n", "<f4>", require "dap".continue, { noremap = true, silent = true })
+    map("n", "<f7>", require "dap".step_into, { noremap = true, silent = true })
+    map("n", "<f8>", require "dap".step_out, { noremap = true, silent = true })
+    map("n", "<f10>", require "dap".step_over, { noremap = true, silent = true })
+    map("v", "K", require "dapui".eval, { noremap = true, silent = true })
 
-		-- Opens up the debugger tab if it's not currently active
-		local function dap_start_debugging()
-			local has_dap_repl = false
-			for _, buf in ipairs(vim.fn.tabpagebuflist()) do
-				if vim.bo[buf].filetype == "dap-repl" then
-					has_dap_repl = true
-					break
-				end
-			end
 
-			if not has_dap_repl then
-				vim.cmd("tabedit %")
-				vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-o>", false, true, true), "n", false)
-				ui.toggle({})
-			end
-			dap.continue({})
-		end
-		vim.keymap.set("n", "<leader>ds", dap_start_debugging)
-
-		-- Detaches the debugger
-		local function dap_end_debug()
-			dap.disconnect({ terminateDebuggee = false }, function()
-				vim.notify("Debugger detached", vim.log.levels.INFO)
-                vim.cmd("tabclose")
-			end)
-		end
-		vim.keymap.set("n", "<leader>dc", dap_end_debug)
-
-		-- Kills the debug process
-		local function dap_kill_debug_process()
-			dap.clear_breakpoints()
-			dap.terminate({}, { terminateDebuggee = true }, function()
-				vim.cmd.bd()
-				resize_vertical_splits()
-				vim.notify("Debug process killed", vim.log.levels.WARN)
-			end)
-		end
-		vim.keymap.set("n", "<leader>dk", dap_kill_debug_process)
-
-		-- Bulk clear all breakpoints
-		local function dap_clear_breakpoints()
-			dap.clear_breakpoints()
-			vim.notify("Breakpoints cleared", vim.log.levels.WARN)
-		end
-
-		vim.keymap.set("n", "<leader>dC", dap_clear_breakpoints)
-
-		-- Other keybindings
-		vim.keymap.set("v", "K", require("dap.ui.widgets").hover)
-		vim.keymap.set("n", "<F4>", dap.continue)
-		vim.keymap.set("n", "<F3>", dap.toggle_breakpoint)
-		vim.keymap.set("n", "<F9>", dap.step_over)
-		vim.keymap.set("n", "<F10>", dap.step_into)
-		vim.keymap.set("n", "<F11>", dap.step_out)
-		vim.keymap.set("n", "<leader>dr", function()
-			require("dap").run_last()
-		end) -- Repeat last command, e.g. attach to PID
-
-		-- UI Settings
-		ui.setup({
-			controls = {
-				element = "repl",
-				enabled = true,
-				icons = {
-					disconnect = "",
-					pause = "",
-					play = "",
-					run_last = "",
-					step_back = "",
-					step_into = "",
-					step_out = "",
-					step_over = "",
-					terminate = "",
-				},
-			},
-			element_mappings = {},
-			expand_lines = true,
-			floating = {
-				border = "single",
-				mappings = {
-					close = { "q", "<Esc>" },
-				},
-			},
-			force_buffers = true,
-			icons = {
-				collapsed = "",
-				current_frame = "",
-				expanded = "",
-			},
-			layouts = {
-				{
-					elements = {
-						"scopes",
-					},
-					size = 0.3,
-					position = "bottom",
-				},
-				{
-					elements = {
-						"repl",
-						"breakpoints",
-					},
-					size = 0.3,
-					position = "right",
-				},
-			},
-			mappings = {
-				edit = "e",
-				expand = { "t", "<2-LeftMouse>" },
-				remove = "d",
-				repl = {},
-				open = {},
-				toggle = {},
-			},
-			render = {
-				indent = 1,
-				max_value_lines = 100,
-			},
-		})
+    -- UI Settings
+    ui.setup({
+        controls = {
+            element = "repl",
+            enabled = false,
+        },
+        element_mappings = {},
+        expand_lines = true,
+        floating = {
+            border = "single",
+            mappings = {
+                close = { "q", "<Esc>" },
+            },
+        },
+        force_buffers = true,
+        icons = {
+            collapsed = "",
+            current_frame = "",
+            expanded = "",
+        },
+        layouts = {
+            {
+                elements = {
+                    "scopes",
+                },
+                size = 0.3,
+                position = "bottom",
+            },
+            {
+                elements = {
+                    "repl",
+                    "breakpoints",
+                },
+                size = 0.3,
+                position = "right",
+            },
+        },
+        render = {
+            indent = 1,
+            max_value_lines = 10000,
+        },
+    })
 
     -- Fuzzy finder
     local builtin = require("telescope.builtin")
@@ -690,17 +584,17 @@ else
     map("n", "<leader>d", "<cmd>Telescope diagnostics<cr>", { noremap = true, silent = true })
     map("n", "<leader>gb", "<cmd>Telescope git_branches<cr>", { noremap = true, silent = true })
     map("n", "<leader>gc", "<cmd>Telescope git_commits<cr>", { noremap = true, silent = true })
-    map("n", "<leader>fg", builtin.live_grep, { noremap = true, silent = true })
     map("n", "<leader>ff", "<cmd>Telescope find_files hidden=true <cr>", { noremap = true, silent = true })
     map("n", "<leader>c", "<cmd>Telescope resume<cr>", { noremap = true, silent = true })
     map("n", "<leader>b", "<cmd>Telescope buffers<cr>", { noremap = true, silent = true })
-    map("n", "<leader>oc", builtin.lsp_outgoing_calls, { noremap = true, silent = true })
     map("n", "<leader>fb", "<cmd>Telescope buffers<cr>", { noremap = true, silent = true })
+    map("n", "<leader>fg", builtin.live_grep, { noremap = true, silent = true })
+    map("n", "<leader>oc", builtin.lsp_outgoing_calls, { noremap = true, silent = true })
     map("n", "<leader>ic", builtin.lsp_incoming_calls, { noremap = true, silent = true })
     map("n", "<leader>im", builtin.lsp_implementations, { noremap = true, silent = true })
     map("n", "<leader>re", builtin.lsp_references, { noremap = true, silent = true })
     map("n", "<leader>sy", builtin.lsp_document_symbols, { noremap = true, silent = true })
-    map('n', '<leader>ref', require('telescope.builtin').lsp_references, { noremap = true, silent = true })
+    map('n', '<leader>ref', builtin.lsp_references, { noremap = true, silent = true })
     map('n', '<leader>si', ':!kill -SIGINT $(pgrep __debug) <CR>', { noremap = true, silent = true })
 
     vim.api.nvim_create_autocmd("BufEnter", {
@@ -711,10 +605,23 @@ else
             end
         end
     })
-
     vim.cmd [[
-         set background=dark
-         colorscheme oxocarbon
-    ]]
-end
+                " set background=dark
+                colorscheme deepwhite
+            ]]
 
+-- Set the background color for the selected line in the location list
+-- vim.api.nvim_set_hl(0, "QuickFixLine", { bg = "#3a3a3a" })
+-- 
+-- -- Set the color for filenames in the location list
+-- vim.api.nvim_set_hl(0, "qfFileName", { fg = "#87afff", bold = true })
+-- vim.api.nvim_set_hl(0, "qfText", { fg = "#87afff", bold = true })
+-- 
+-- -- Set the color for line numbers in the location list
+-- vim.api.nvim_set_hl(0, "qfLineNr", { fg = "#3a3a3a" })
+-- 
+-- -- Set colors for different diagnostic types
+-- vim.api.nvim_set_hl(0, "qfError", { fg = "#ff5f5f" })
+-- vim.api.nvim_set_hl(0, "qfWarning", { fg = "#d7af5f" })
+-- vim.api.nvim_set_hl(0, "qfInfo", { fg = "#5fd7ff" })
+end
