@@ -142,8 +142,12 @@ else
 
         -- Lsp
         { "neovim/nvim-lspconfig" },
-        { "williamboman/mason.nvim" },
-        { "jay-babu/mason-nvim-dap.nvim" },
+        { "williamboman/mason.nvim"}, 
+        { "jay-babu/mason-nvim-dap.nvim",ft = "go",
+		config = function () 
+			vim.cmd("MasonUpdate") 
+		end},
+
         { "williamboman/mason-lspconfig.nvim" },
         { "nvim-treesitter/nvim-treesitter",  build = ":TSUpdate" },
 
@@ -453,7 +457,9 @@ else
     dap.set_log_level("TRACE")
 
     mason.setup()
-    mason_dap.setup({})
+    mason_dap.setup({
+        "delve",
+    })
 
     dap.configurations.go = {
         {
@@ -487,6 +493,7 @@ else
             conf.args = { os.getenv("HOME") .. "/Projects/vscode-go/extension/dist/debugAdapter.js" }
             conf.dlvToolPath = vim.fn.exepath('dlv') or "/usr/bin/dlv"
             on_config(conf)
+            print(conf.dlvToolPath)
         end,
     }
 
