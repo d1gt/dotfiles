@@ -67,7 +67,7 @@ else
     vim.g.go_metalinter_command = 'golangci-lint'
     vim.g.go_metalinter_enabled = {}
     vim.g.go_metalinter_autosave = 1
-    vim.g.go_metalinter_autosave_enabled = {'govet', 'errcheck', 'staticcheck', 'unused'}
+    vim.g.go_metalinter_autosave_enabled = { 'govet', 'errcheck', 'staticcheck', 'unused' }
 
     -- Disable netrw
     vim.g.loaded_netrw = 1
@@ -142,11 +142,14 @@ else
 
         -- Lsp
         { "neovim/nvim-lspconfig" },
-        { "williamboman/mason.nvim"}, 
-        { "jay-babu/mason-nvim-dap.nvim",ft = "go",
-		config = function () 
-			vim.cmd("MasonUpdate") 
-		end},
+        { "williamboman/mason.nvim" },
+        {
+            "jay-babu/mason-nvim-dap.nvim",
+            ft = "go",
+            config = function()
+                vim.cmd("MasonUpdate")
+            end
+        },
 
         { "williamboman/mason-lspconfig.nvim" },
         { "nvim-treesitter/nvim-treesitter",  build = ":TSUpdate" },
@@ -176,7 +179,7 @@ else
         { "savq/melange-nvim" },
 
         -- { "Verf/deepwhite.nvim" },
-        { "Verf/deepwhite.nvim", dev=true, dir="~/Projects/deepwhite.nvim/"},
+        { "Verf/deepwhite.nvim",     dev = true,                                            dir = "~/Projects/deepwhite.nvim/" },
 
         -- Debugger
         { "leoluz/nvim-dap-go",      ft = "go" },
@@ -493,7 +496,6 @@ else
             conf.args = { os.getenv("HOME") .. "/Projects/vscode-go/extension/dist/debugAdapter.js" }
             conf.dlvToolPath = vim.fn.exepath('dlv') or "/usr/bin/dlv"
             on_config(conf)
-            print(conf.dlvToolPath)
         end,
     }
 
@@ -520,12 +522,12 @@ else
 
     -- Kills the debug process
     local function dap_kill_debug_process()
+        require("zen-mode").close()
         dap.clear_breakpoints()
         dap.terminate({}, { terminateDebuggee = true }, function()
-            ui.close({})
-            -- resize_vertical_splits()
             vim.notify("Debug process killed", vim.log.levels.WARN)
         end)
+        ui.close({})
     end
 
     -- Other keybindings
@@ -617,18 +619,18 @@ else
                 colorscheme deepwhite
             ]]
 
--- Set the background color for the selected line in the location list
--- vim.api.nvim_set_hl(0, "QuickFixLine", { bg = "#3a3a3a" })
--- 
--- -- Set the color for filenames in the location list
--- vim.api.nvim_set_hl(0, "qfFileName", { fg = "#87afff", bold = true })
--- vim.api.nvim_set_hl(0, "qfText", { fg = "#87afff", bold = true })
--- 
--- -- Set the color for line numbers in the location list
--- vim.api.nvim_set_hl(0, "qfLineNr", { fg = "#3a3a3a" })
--- 
--- -- Set colors for different diagnostic types
--- vim.api.nvim_set_hl(0, "qfError", { fg = "#ff5f5f" })
--- vim.api.nvim_set_hl(0, "qfWarning", { fg = "#d7af5f" })
--- vim.api.nvim_set_hl(0, "qfInfo", { fg = "#5fd7ff" })
+    -- Set the background color for the selected line in the location list
+    -- vim.api.nvim_set_hl(0, "QuickFixLine", { bg = "#3a3a3a" })
+    --
+    -- -- Set the color for filenames in the location list
+    -- vim.api.nvim_set_hl(0, "qfFileName", { fg = "#87afff", bold = true })
+    -- vim.api.nvim_set_hl(0, "qfText", { fg = "#87afff", bold = true })
+    --
+    -- -- Set the color for line numbers in the location list
+    -- vim.api.nvim_set_hl(0, "qfLineNr", { fg = "#3a3a3a" })
+    --
+    -- -- Set colors for different diagnostic types
+    -- vim.api.nvim_set_hl(0, "qfError", { fg = "#ff5f5f" })
+    -- vim.api.nvim_set_hl(0, "qfWarning", { fg = "#d7af5f" })
+    -- vim.api.nvim_set_hl(0, "qfInfo", { fg = "#5fd7ff" })
 end
